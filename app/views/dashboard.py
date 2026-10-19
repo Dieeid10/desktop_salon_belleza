@@ -62,7 +62,6 @@ class DashboardView(ttk.Frame):
         if is_owner:
             tabs.add(self.user_admin, text="Gestión de Usuarios")
 
-        self.loaded: set[int] = set()
         tabs.bind("<<NotebookTabChanged>>", self._tab_changed)
         self._tab_changed()
 
@@ -75,14 +74,12 @@ class DashboardView(ttk.Frame):
         if not tab:
             return
         view = self.nametowidget(tab)
-        if id(view) in self.loaded or not hasattr(view, "refresh"):
+        if not hasattr(view, "refresh"):
             return
         try:
             view.refresh()
         except ApiError as error:
             messagebox.showerror("Error de API", str(error), parent=view)
-        else:
-            self.loaded.add(id(view))
 
 
 class UsuariosView(ttk.Frame):

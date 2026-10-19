@@ -14,31 +14,40 @@ class ComprobanteView(DataView):
         self.services: dict[int, str] = {}
         self.clients: dict[int, str] = {}
 
-        controls = tk.Frame(self, pady=10)
+        client_row = ttk.Frame(self, padding=(10, 8, 10, 2))
+        client_row.pack(fill="x")
+        self.client_label = ttk.Label(client_row, text="Cliente: cualquiera")
+        self.client_label.pack(anchor="w")
+
+        controls = ttk.Frame(self, padding=(10, 2, 10, 8))
         controls.pack(fill="x")
-        self.client_label = ttk.Label(controls, text="Cliente: cualquiera")
-        self.client_label.pack(side="left", padx=10)
-        ttk.Label(controls, text="Turno realizado:").pack(side="left", padx=5)
-        self.turn_list = tk.Listbox(controls, height=5, width=68, exportselection=0)
-        self.turn_list.pack(side="left", padx=5)
-        scrollbar = ttk.Scrollbar(controls, orient="vertical", command=self.turn_list.yview)
-        scrollbar.pack(side="left", fill="y")
+        turn_frame = ttk.Frame(controls)
+        turn_frame.pack(side="left", fill="both", expand=True)
+        ttk.Label(turn_frame, text="Turno realizado:").pack(anchor="w", pady=(0, 4))
+        list_frame = ttk.Frame(turn_frame)
+        list_frame.pack(fill="both", expand=True)
+        self.turn_list = tk.Listbox(list_frame, height=5, width=48, exportselection=0)
+        self.turn_list.pack(side="left", fill="both", expand=True)
+        scrollbar = ttk.Scrollbar(list_frame, orient="vertical", command=self.turn_list.yview)
+        scrollbar.pack(side="right", fill="y")
         self.turn_list.configure(yscrollcommand=scrollbar.set)
         self.turn_list.bind("<<ListboxSelect>>", self._update_button)
-        actions = ttk.Frame(controls)
-        actions.pack(side="left", padx=8, fill="y")
+
+        actions = ttk.Frame(controls, padding=(12, 0, 0, 0))
+        actions.pack(side="right", fill="y")
         ttk.Label(actions, text="Detalle del descuento por chisme:").pack(anchor="w")
-        self.detail = ttk.Entry(actions, width=30)
-        self.detail.pack(anchor="w", pady=4)
+        self.detail = ttk.Entry(actions, width=32)
+        self.detail.pack(fill="x", pady=4)
         self.generate_button = tk.Button(
             actions, text="Generar Ticket", bg="#aaaaaa", fg="#666666",
             state="disabled", command=lambda: self.run_action(self.register),
         )
-        self.generate_button.pack(anchor="w", pady=8)
-        tk.Button(
+        self.generate_button.pack(fill="x", pady=(4, 6))
+        self.refresh_button = tk.Button(
             actions, text="Actualizar Lista", bg="#5bc0de", fg="black",
             command=lambda: self.run_action(self.refresh),
-        ).pack(anchor="w")
+        )
+        self.refresh_button.pack(fill="x")
 
         self.ticket = tk.Text(self, font=("Courier", 10), bg="#FDF5E6", fg="black", wrap="none")
         self.ticket.pack(fill="both", expand=True, padx=20, pady=10)
@@ -68,7 +77,9 @@ class ComprobanteView(DataView):
     def filter_client(self, client: dict | None) -> None:
         self.selected_client = client
         if client:
-            self.client_label.configure(text=f"Cliente: {client['nombre']} {client['apellido']}")
+            self.client_label.configure(
+                text=f"Cliente: {client['nombre']} {client['apellido']} (#{client['id']})"
+            )
         else:
             self.client_label.configure(text="Cliente: cualquiera")
         self._render_turns()
@@ -155,28 +166,6 @@ class HistorialView(DataView):
             {"ID Venta": 70, "Fecha / Hora": 145, "Cliente": 140,
              "Servicio Realizado": 200, "Monto Cobrado": 105, "Atendido Por": 115},
         )
-
-    def refresh(self) -> None:
-        sales = self.salon.listar_ventas()
-        clients = {
-            client["id"]: f"{client['nombre']} {client['apellido']}"
-            for client in self.salon.listar_clientes_con_estado()
-        }
-        services = {
-            service["id"]: service["nombre_servicio"]
-            for service in self.salon.listar_servicios(gestion=True)
-        }
-        self.clear_tree(self.table)
-        for sale in sales:
-            names = ", ".join(
-                services.get(detail["servicio_id"], "Servicio eliminado")
-                for detail in sale["detalles"]
-            )
-            self.table.insert("", tk.END, values=(
-                sale["id"], sale["fecha_hora"].replace("T", " ")[:16],
-                clients.get(sale.get("cliente_id"), "Cliente eliminado"), names,
-                f"${sale['total']}", str(sale.get("empleado_id") or "N/A")[:12],
-            ))
 
     def refresh(self) -> None:
         sales = self.salon.listar_ventas()

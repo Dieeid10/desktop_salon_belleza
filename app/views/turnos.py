@@ -176,7 +176,8 @@ class TurnosView(DataView):
     def fill_client(self, client: dict) -> None:
         self.client = client
         self.client_label.configure(
-            text=f"Cliente: {client['nombre']} {client['apellido']}", fg="green"
+            text=f"Cliente: {client['nombre']} {client['apellido']} (#{client['id']})",
+            fg="green",
         )
         self._update_buttons()
 
