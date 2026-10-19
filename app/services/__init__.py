@@ -1,0 +1,1 @@
+"""HTTP services used by the desktop views."""
