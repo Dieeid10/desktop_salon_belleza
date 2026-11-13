@@ -23,3 +23,9 @@ ni cambiar contraseñas.
 
 duena@gmail.com
 NuevaClave123
+
+vendedora@gmail.com
+Vendedora!123
+
+vendedor2@gmail.com
+Vendedor*123

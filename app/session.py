@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-
 @dataclass
 class Session:
     access_token: str | None = None

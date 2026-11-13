@@ -45,7 +45,7 @@ class ApiClient:
             raise ApiError(detail, response.status_code)
         if response.status_code == 204:
             return None
-        return response.json()
+        return self._unwrap_response(response.json())
 
     def _refresh_session(self) -> None:
         refresh_token = self.session.refresh_token
@@ -62,7 +62,14 @@ class ApiClient:
         if not response.is_success:
             self.session.clear()
             raise ApiError("La sesión venció. Iniciá sesión nuevamente.")
-        self.session.update(response.json())
+        self.session.update(self._unwrap_response(response.json()))
+
+    @staticmethod
+    def _unwrap_response(payload: Any) -> Any:
+        """Extrae data de la respuesta MVC o deja intacta una respuesta antigua."""
+        if isinstance(payload, dict) and payload.get("success") is True:
+            return payload.get("data")
+        return payload
 
     @staticmethod
     def _error_detail(response: httpx.Response) -> str:
@@ -70,7 +77,10 @@ class ApiClient:
             payload = response.json()
         except ValueError:
             return f"La API respondió con HTTP {response.status_code}."
-        detail = payload.get("detail", "")
+        detail = payload.get("message") or payload.get("detail", "")
+        errors = payload.get("errors")
+        if errors:
+            detail = f"{detail}: {errors}" if detail else errors
         if isinstance(detail, list):
             return "; ".join(str(item.get("msg", item)) for item in detail)
         return str(detail or f"La API respondió con HTTP {response.status_code}.")
