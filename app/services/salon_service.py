@@ -185,6 +185,19 @@ class SalonService:
                 return False
             raise
 
+    def listar_personal(self) -> list[dict[str, Any]]:
+        return self.api.request("GET", "/admin/staff/")
+
+    def invitar_vendedor(self, nombre: str, email: str) -> dict[str, Any]:
+        return self.api.request(
+            "POST",
+            "/admin/staff/",
+            json={"name": nombre, "email": email},
+        )
+
+    def eliminar_vendedor(self, user_id: str) -> None:
+        self.api.request("DELETE", f"/admin/staff/{user_id}")
+
     def listar_descuentos(self, gestion: bool = False) -> list[dict[str, Any]]:
         path = "/discounts/management" if gestion else "/discounts/"
         discounts = self.api.request("GET", path)
