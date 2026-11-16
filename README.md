@@ -20,12 +20,3 @@ La sesión se renueva contra `/auth/refresh` cuando la API responde `401`.
 Cerrar sesión o cerrar la ventana descarta ambos tokens. La gestión de usuarios
 no está incluida porque la API todavía no publica endpoints para crear usuarios
 ni cambiar contraseñas.
-
-duena@gmail.com
-NuevaClave123
-
-vendedora@gmail.com
-Vendedora!123
-
-vendedor2@gmail.com
-Vendedor*123
